@@ -5,8 +5,8 @@ databases:
     ipAllowList: []
 
 services:
-  # PostgreSQL Database Service
-  - type: pserv
+  # Backend Web Service
+  - type: web
     name: rss-aggregator-backend
     runtime: node
     plan: starter
@@ -83,11 +83,11 @@ services:
       - key: LOG_LEVEL
         value: info
 
-  # Static Site Service for React Frontend (if separate)
+  # Static Site Service for React Frontend
   - type: static
     name: rss-aggregator-frontend
-    buildCommand: npm run build
-    staticPublishPath: ./build
+    buildCommand: cd frontend && npm ci && npm run build
+    staticPublishPath: ./frontend/dist
     pullRequestPreviewsEnabled: false
     headers:
       - path: /*
