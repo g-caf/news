@@ -37,15 +37,6 @@ export default {
         'sans': ['Inter', 'system-ui', 'sans-serif'],
         'display': ['Playfair Display', 'Georgia', 'serif'],
       },
-      typography: {
-        DEFAULT: {
-          css: {
-            maxWidth: 'none',
-            color: '#334155',
-            lineHeight: '1.7',
-          },
-        },
-      },
     },
   },
   plugins: [
