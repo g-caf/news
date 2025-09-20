@@ -1,7 +1,7 @@
 {
   "name": "rss-aggregator-backend",
   "version": "1.0.0",
-  "description": "RSS aggregation backend with feed parsing and article management",
+  "description": "RSS aggregation backend with feed parsing and article management - fixed",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
