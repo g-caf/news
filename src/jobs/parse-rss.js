@@ -1,5 +1,6 @@
+require('dotenv').config();
 const winston = require('winston');
-const { parseAllFeeds } = require('../services/rssService');
+const rssParser = require('../services/rssParser');
 
 // Configure logger
 const logger = winston.createLogger({
@@ -20,12 +21,13 @@ async function runRSSParsingJob() {
     logger.info('Starting one-time RSS feed parsing job...');
     const startTime = Date.now();
     
-    const result = await parseAllFeeds();
+    const result = await rssParser.parseAllActiveFeeds();
     
     const duration = Date.now() - startTime;
     logger.info('RSS feed parsing job completed', { 
-      feedsProcessed: result.feedsProcessed,
-      articlesAdded: result.articlesAdded,
+      feedsProcessed: result.successful_feeds,
+      totalFeeds: result.total_feeds,
+      articlesAdded: result.total_articles,
       duration: `${duration}ms`
     });
     

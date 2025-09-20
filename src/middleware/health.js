@@ -1,32 +1,27 @@
 const { pool } = require('../config/database');
 
-// Health check endpoint
+// Simple health check endpoint that doesn't require database
 const healthCheck = async (req, res) => {
   try {
-    // Check database connection
-    const dbResult = await pool.query('SELECT NOW()');
-    
-    // Get basic system info
+    // Get basic system info without database dependency
     const uptime = process.uptime();
     const memoryUsage = process.memoryUsage();
     
     res.status(200).json({
-      status: 'healthy',
+      status: 'ok',
       timestamp: new Date().toISOString(),
-      uptime: `${Math.floor(uptime)}s`,
-      database: {
-        status: 'connected',
-        timestamp: dbResult.rows[0].now
-      },
+      uptime: uptime,
       memory: {
-        used: Math.round(memoryUsage.heapUsed / 1024 / 1024) + 'MB',
-        total: Math.round(memoryUsage.heapTotal / 1024 / 1024) + 'MB'
-      },
-      environment: process.env.NODE_ENV || 'development'
+        rss: memoryUsage.rss,
+        heapTotal: memoryUsage.heapTotal,
+        heapUsed: memoryUsage.heapUsed,
+        external: memoryUsage.external,
+        arrayBuffers: memoryUsage.arrayBuffers
+      }
     });
   } catch (error) {
     res.status(503).json({
-      status: 'unhealthy',
+      status: 'error',
       timestamp: new Date().toISOString(),
       error: error.message,
       database: {

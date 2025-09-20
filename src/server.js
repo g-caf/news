@@ -19,7 +19,7 @@ const searchRouter = require('./routes/search');
 const adminRouter = require('./routes/admin');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 
 // Ensure logs directory exists
 const logsDir = path.join(__dirname, '..', 'logs');
