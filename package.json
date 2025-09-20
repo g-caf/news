@@ -9,6 +9,7 @@
     "migrate": "node src/migrations/migrate.js",
     "seed": "node src/seeds/seed.js",
     "build": "npm ci --only=production",
+    "build:frontend": "cd frontend && npm ci && npm run build",
     "test": "jest",
     "worker": "node src/workers/rss-worker.js",
     "cron": "node src/jobs/parse-rss.js",
