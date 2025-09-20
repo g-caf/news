@@ -1,6 +1,7 @@
+require('dotenv').config();
 const cron = require('node-cron');
 const winston = require('winston');
-const { parseAllFeeds } = require('../services/rssService');
+const rssParser = require('../services/rssParser');
 
 // Configure logger
 const logger = winston.createLogger({
@@ -20,10 +21,11 @@ const logger = winston.createLogger({
 async function parseRSSFeeds() {
   try {
     logger.info('Starting RSS feed parsing...');
-    const result = await parseAllFeeds();
+    const result = await rssParser.parseAllActiveFeeds();
     logger.info('RSS feed parsing completed', { 
-      feedsProcessed: result.feedsProcessed,
-      articlesAdded: result.articlesAdded 
+      feedsProcessed: result.successful_feeds,
+      totalFeeds: result.total_feeds,
+      articlesAdded: result.total_articles 
     });
   } catch (error) {
     logger.error('Error parsing RSS feeds:', error);
