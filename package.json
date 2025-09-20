@@ -12,8 +12,7 @@
     "build:frontend": "cd frontend && npm ci && npm run build",
     "test": "jest",
     "worker": "node src/workers/rss-worker.js",
-    "cron": "node src/jobs/parse-rss.js",
-    "postinstall": "npm run migrate"
+    "cron": "node src/jobs/parse-rss.js"
   },
   "keywords": ["rss", "aggregator", "backend", "express", "postgresql"],
   "author": "",
