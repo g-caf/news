@@ -5,9 +5,9 @@ databases:
     ipAllowList: []
 
 services:
-  # Backend Web Service
+  # NewsHub Web Service (Express + EJS)
   - type: web
-    name: rss-aggregator-backend
+    name: newshub
     runtime: node
     plan: starter
     buildCommand: npm ci
@@ -34,23 +34,9 @@ services:
         value: 100
       - key: LOG_LEVEL
         value: info
-      - key: PORT
-        value: 10000
     disk:
-      name: backend-logs
+      name: app-logs
       mountPath: /app/logs
       sizeGB: 1
-
-  # Frontend Static Site
-  - type: static
-    name: rss-aggregator-frontend
-    buildCommand: cd frontend && npm ci && npm run build
-    staticPublishPath: frontend/dist
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
-
-  # Background services temporarily disabled until web service is stable
 
 

@@ -1,0 +1,63 @@
+<%- include('partials/head', { title: 'Latest Stories' }) %>
+<body class="home-page">
+    <%- include('partials/header') %>
+    
+    <main class="main-content">
+        <div class="container">
+            <div class="page-header">
+                <h1>Latest Stories</h1>
+                <p>Stay informed with the latest articles from your favorite publications</p>
+            </div>
+            
+            <div class="filter-section">
+                <h3>Filter by publication:</h3>
+                <div class="publication-filters">
+                    <a href="/" class="filter-btn <%= !selectedPublication ? 'active' : '' %>">All</a>
+                    <% publications.forEach(pub => { %>
+                        <a href="/?publication=<%= pub.id %>" 
+                           class="filter-btn <%= selectedPublication == pub.id ? 'active' : '' %>">
+                            <%= pub.name %>
+                        </a>
+                    <% }) %>
+                </div>
+            </div>
+            
+            <div class="articles-grid">
+                <% if (articles.length === 0) { %>
+                    <div class="no-articles">
+                        <h3>No articles found</h3>
+                        <p>Try adjusting your filters or check back later for new content.</p>
+                    </div>
+                <% } else { %>
+                    <% articles.forEach(article => { %>
+                        <article class="article-card">
+                            <div class="article-meta">
+                                <span class="publication-name"><%= article.publication_name %></span>
+                                <span class="publish-date"><%= new Date(article.published_at).toLocaleDateString() %></span>
+                            </div>
+                            <h2 class="article-title">
+                                <a href="/articles/<%= article.id %>"><%= article.title %></a>
+                            </h2>
+                            <% if (article.description) { %>
+                                <p class="article-description"><%= article.description %></p>
+                            <% } %>
+                            <div class="article-actions">
+                                <a href="<%= article.url %>" target="_blank" rel="noopener noreferrer" class="read-original">
+                                    Read Original →
+                                </a>
+                            </div>
+                        </article>
+                    <% }) %>
+                <% } %>
+            </div>
+            
+            <% if (articles.length >= 20) { %>
+                <div class="pagination">
+                    <a href="?offset=<%= (offset || 0) + 20 %><%= selectedPublication ? '&publication=' + selectedPublication : '' %>" 
+                       class="load-more-btn">Load More Articles</a>
+                </div>
+            <% } %>
+        </div>
+    </main>
+    
+    <%- include('partials/footer') %>

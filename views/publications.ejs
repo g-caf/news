@@ -1,0 +1,63 @@
+<%- include('partials/head', { title: 'Publications' }) %>
+<body class="publications-page">
+    <%- include('partials/header') %>
+    
+    <main class="main-content">
+        <div class="container">
+            <div class="page-header">
+                <h1>Publications</h1>
+                <p>Manage your RSS feed sources</p>
+            </div>
+            
+            <div class="publications-grid">
+                <% publications.forEach(pub => { %>
+                    <div class="publication-card">
+                        <div class="publication-header">
+                            <h3><%= pub.name %></h3>
+                            <div class="publication-meta">
+                                <span class="category"><%= pub.category || 'General' %></span>
+                                <span class="status <%= pub.active ? 'active' : 'inactive' %>">
+                                    <%= pub.active ? 'Active' : 'Inactive' %>
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <% if (pub.description) { %>
+                            <p class="publication-description"><%= pub.description %></p>
+                        <% } %>
+                        
+                        <div class="publication-stats">
+                            <div class="stat">
+                                <strong><%= pub.article_count || 0 %></strong>
+                                <span>Articles</span>
+                            </div>
+                            <div class="stat">
+                                <strong><%= pub.last_updated ? new Date(pub.last_updated).toLocaleDateString() : 'Never' %></strong>
+                                <span>Last Updated</span>
+                            </div>
+                        </div>
+                        
+                        <div class="publication-actions">
+                            <a href="/?publication=<%= pub.id %>" class="view-articles-btn">
+                                View Articles
+                            </a>
+                            <% if (pub.website_url) { %>
+                                <a href="<%= pub.website_url %>" target="_blank" rel="noopener noreferrer" class="visit-site-btn">
+                                    Visit Site →
+                                </a>
+                            <% } %>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+            
+            <% if (publications.length === 0) { %>
+                <div class="no-publications">
+                    <h3>No publications found</h3>
+                    <p>RSS feeds will appear here once they're configured.</p>
+                </div>
+            <% } %>
+        </div>
+    </main>
+    
+    <%- include('partials/footer') %>

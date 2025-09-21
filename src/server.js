@@ -17,6 +17,7 @@ const publicationsRouter = require('./routes/publications');
 const authRouter = require('./routes/auth');
 const searchRouter = require('./routes/search');
 const adminRouter = require('./routes/admin');
+const pagesRouter = require('./routes/pages');
 
 const app = express();
 const PORT = process.env.PORT || 10000;
@@ -27,14 +28,21 @@ if (!fs.existsSync(logsDir)) {
   fs.mkdirSync(logsDir, { recursive: true });
 }
 
+// Configure EJS template engine
+app.set('trust proxy', 1);
+app.set('views', path.join(__dirname, '..', 'views'));
+app.set('view engine', 'ejs');
+if (process.env.NODE_ENV === 'production') {
+  app.set('view cache', true);
+}
+
 // Security middleware
 app.use(helmet());
-app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? process.env.CORS_ORIGIN?.split(',') || false
-    : true,
-  credentials: true
-}));
+
+// CORS only in development - production serves from same origin
+if (process.env.NODE_ENV !== 'production') {
+  app.use(cors({ origin: true, credentials: true }));
+}
 
 // Rate limiting
 const limiter = rateLimit({
@@ -47,6 +55,12 @@ const limiter = rateLimit({
   legacyHeaders: false,
 });
 app.use('/api', limiter);
+
+// Static assets
+app.use('/assets', express.static(path.join(__dirname, '..', 'public'), { 
+  maxAge: '1y', 
+  immutable: true 
+}));
 
 // Compression and parsing middleware
 app.use(compression());
@@ -70,27 +84,36 @@ app.get('/health', (req, res) => {
   });
 });
 
-// API routes
+// API health check for Render
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
+});
+
+// Page routes (serve HTML)
+app.use('/', pagesRouter);
+
+// API routes (serve JSON)
 app.use('/api/articles', articlesRouter);
 app.use('/api/publications', publicationsRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/search', searchRouter);
 app.use('/api/admin', adminRouter);
 
-// Serve static files in production (if you have a frontend build)
-if (process.env.NODE_ENV === 'production') {
-  const buildPath = path.join(__dirname, '..', 'build');
-  if (fs.existsSync(buildPath)) {
-    app.use(express.static(buildPath));
-    app.get('*', (req, res) => {
-      res.sendFile(path.join(buildPath, 'index.html'));
-    });
-  }
-}
+// 404 handler for API routes only
+app.use('/api/*', (req, res) => {
+  res.status(404).json({ error: 'API endpoint not found' });
+});
 
-// 404 handler
-app.use('*', (req, res) => {
-  res.status(404).json({ error: 'Endpoint not found' });
+// 404 handler for pages
+app.use((req, res) => {
+  if (req.path.startsWith('/api')) {
+    return res.status(404).json({ error: 'Endpoint not found' });
+  }
+  return res.status(404).render('errors/404', { title: 'Page Not Found' });
 });
 
 // Global error handler
@@ -106,9 +129,18 @@ app.use((err, req, res, next) => {
     ? 'Internal server error'
     : err.message;
 
-  res.status(statusCode).json({
+  // Return JSON for API routes, HTML for page routes
+  if (req.path.startsWith('/api') || req.accepts('json')) {
+    return res.status(statusCode).json({
+      error: message,
+      ...(process.env.NODE_ENV !== 'production' && { stack: err.stack })
+    });
+  }
+  
+  return res.status(statusCode).render('errors/500', { 
+    title: 'Server Error',
     error: message,
-    ...(process.env.NODE_ENV !== 'production' && { stack: err.stack })
+    stack: process.env.NODE_ENV !== 'production' ? err.stack : undefined
   });
 });
 

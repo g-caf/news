@@ -1,0 +1,55 @@
+<%- include('partials/head', { title: 'Search Results' }) %>
+<body class="search-page">
+    <%- include('partials/header', { query: query }) %>
+    
+    <main class="main-content">
+        <div class="container">
+            <div class="search-header">
+                <h1>Search Results</h1>
+                <% if (query) { %>
+                    <p>Showing results for: <strong>"<%= query %>"</strong></p>
+                <% } %>
+            </div>
+            
+            <div class="search-results">
+                <% if (articles.length === 0) { %>
+                    <div class="no-results">
+                        <h3>No articles found</h3>
+                        <% if (query) { %>
+                            <p>Try different keywords or <a href="/">browse all articles</a>.</p>
+                        <% } else { %>
+                            <p>Please enter a search query.</p>
+                        <% } %>
+                    </div>
+                <% } else { %>
+                    <div class="results-count">
+                        Found <%= articles.length %> article<%= articles.length === 1 ? '' : 's' %>
+                    </div>
+                    
+                    <div class="articles-list">
+                        <% articles.forEach(article => { %>
+                            <article class="search-result">
+                                <div class="article-meta">
+                                    <span class="publication-name"><%= article.publication_name %></span>
+                                    <span class="publish-date"><%= new Date(article.published_at).toLocaleDateString() %></span>
+                                </div>
+                                <h2 class="article-title">
+                                    <a href="/articles/<%= article.id %>"><%= article.title %></a>
+                                </h2>
+                                <% if (article.description) { %>
+                                    <p class="article-description"><%= article.description %></p>
+                                <% } %>
+                                <div class="article-actions">
+                                    <a href="<%= article.url %>" target="_blank" rel="noopener noreferrer" class="read-original">
+                                        Read Original →
+                                    </a>
+                                </div>
+                            </article>
+                        <% }) %>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </main>
+    
+    <%- include('partials/footer') %>

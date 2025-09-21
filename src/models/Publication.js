@@ -97,6 +97,26 @@ class Publication {
     );
     return result.rows;
   }
+
+  // Alias methods for consistency with page routes
+  static async getAll() {
+    return this.findAll(true);
+  }
+
+  static async getAllWithStats() {
+    const sql = `
+      SELECT p.*, 
+             COUNT(a.id) as article_count,
+             MAX(a.published_date) as last_updated,
+             p.is_active as active
+      FROM publications p
+      LEFT JOIN articles a ON p.id = a.publication_id
+      GROUP BY p.id
+      ORDER BY p.name
+    `;
+    const result = await query(sql);
+    return result.rows;
+  }
 }
 
 module.exports = Publication;

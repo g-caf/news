@@ -1,0 +1,17 @@
+<header class="site-header">
+    <div class="container">
+        <div class="header-content">
+            <h1 class="site-title">
+                <a href="/">📰 NewsHub</a>
+            </h1>
+            <nav class="main-nav">
+                <a href="/" class="nav-link">Latest</a>
+                <a href="/publications" class="nav-link">Publications</a>
+            </nav>
+            <form class="search-form" action="/search" method="GET">
+                <input type="search" name="q" placeholder="Search articles..." value="<%= typeof query !== 'undefined' ? query : '' %>">
+                <button type="submit">🔍</button>
+            </form>
+        </div>
+    </div>
+</header>

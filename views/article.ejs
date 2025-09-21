@@ -1,0 +1,50 @@
+<%- include('partials/head', { title: article.title }) %>
+<body class="article-page">
+    <%- include('partials/header') %>
+    
+    <main class="main-content">
+        <div class="container">
+            <article class="article-full">
+                <div class="article-meta">
+                    <span class="publication-name"><%= article.publication_name %></span>
+                    <span class="publish-date"><%= new Date(article.published_at).toLocaleString() %></span>
+                </div>
+                
+                <h1 class="article-title"><%= article.title %></h1>
+                
+                <% if (article.description) { %>
+                    <div class="article-summary">
+                        <%= article.description %>
+                    </div>
+                <% } %>
+                
+                <div class="article-actions">
+                    <a href="<%= article.url %>" target="_blank" rel="noopener noreferrer" class="read-original-btn">
+                        Read Original Article →
+                    </a>
+                </div>
+                
+                <% if (article.content && article.content.trim()) { %>
+                    <div class="article-content">
+                        <%- sanitizedContent %>
+                    </div>
+                <% } %>
+                
+                <div class="article-footer">
+                    <p>
+                        Originally published by <strong><%= article.publication_name %></strong>
+                        on <%= new Date(article.published_at).toLocaleDateString() %>
+                    </p>
+                    <a href="<%= article.url %>" target="_blank" rel="noopener noreferrer">
+                        View original article
+                    </a>
+                </div>
+            </article>
+            
+            <div class="navigation-links">
+                <a href="/" class="back-link">← Back to Latest Stories</a>
+            </div>
+        </div>
+    </main>
+    
+    <%- include('partials/footer') %>
