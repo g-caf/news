@@ -41,6 +41,16 @@ services:
       mountPath: /app/logs
       sizeGB: 1
 
+  # Frontend Static Site
+  - type: static
+    name: rss-aggregator-frontend
+    buildCommand: cd frontend && npm ci && npm run build
+    staticPublishPath: frontend/dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
   # Background services temporarily disabled until web service is stable
 
 
