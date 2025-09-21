@@ -11,7 +11,7 @@ app.use(cors());
 app.use(express.json());
 
 // Health check - no database dependency
-app.get('/health', (req, res) => {
+app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
@@ -31,5 +31,5 @@ app.get('/api/test', (req, res) => {
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 Minimal server running on port ${PORT}`);
-  console.log(`Health check: http://localhost:${PORT}/health`);
+  console.log(`Health check: http://localhost:${PORT}/api/health`);
 });
