@@ -6,9 +6,21 @@ const logger = require('../utils/logger');
 class RSSParserService {
   constructor() {
     this.parser = new Parser({
-      timeout: 10000,
+      timeout: 15000,
+      requestOptions: {
+        headers: {
+          'User-Agent': 'NewsHub RSS Aggregator/1.0 (+https://newshub-efwe.onrender.com)',
+          'Accept': 'application/rss+xml, application/xml;q=0.9, text/xml;q=0.8, */*;q=0.5'
+        }
+      },
       customFields: {
-        item: ['media:content', 'content:encoded', 'content']
+        item: [
+          ['media:content', 'media:content', { keepArray: true }],
+          'media:thumbnail',
+          'content:encoded',
+          'content',
+          'feedburner:origLink'
+        ]
       }
     });
   }
@@ -21,9 +33,13 @@ class RSSParserService {
       const articles = [];
 
       for (const item of feed.items) {
-        const article = this.extractArticleData(item, publication.id);
-        if (article) {
-          articles.push(article);
+        try {
+          const article = this.extractArticleData(item, publication.id);
+          if (article) {
+            articles.push(article);
+          }
+        } catch (itemError) {
+          logger.warn(`Skipping malformed item for ${publication.name}: ${itemError.message}`);
         }
       }
 
@@ -46,7 +62,12 @@ class RSSParserService {
   }
 
   extractArticleData(item, publicationId) {
-    if (!item.title || !item.link) {
+    // Get URL from various possible fields
+    const url = (item.link && typeof item.link === 'string' ? item.link : item.link?.href) ||
+                item['feedburner:origLink'] ||
+                (Array.isArray(item.links) ? item.links[0]?.href : undefined);
+    
+    if (!item.title || !url) {
       return null;
     }
 
@@ -59,14 +80,34 @@ class RSSParserService {
       summary = this.createSummary(content);
     }
 
-    // Extract image URL
+    // Extract image URL safely
     let imageUrl = null;
-    if (item.enclosure && item.enclosure.type && item.enclosure.type.startsWith('image/')) {
-      imageUrl = item.enclosure.url;
-    } else if (item['media:content']) {
-      imageUrl = item['media:content'].$.url;
-    } else if (item.image) {
-      imageUrl = typeof item.image === 'string' ? item.image : item.image.url;
+    try {
+      if (item.enclosure?.type?.startsWith('image/')) {
+        imageUrl = item.enclosure.url;
+      } else if (item['media:content']) {
+        const mc = item['media:content'];
+        if (Array.isArray(mc)) {
+          const candidate = mc.find(x => x?.$?.url || x?.url) || mc[0];
+          imageUrl = candidate?.$?.url || candidate?.url || null;
+        } else if (typeof mc === 'object' && mc !== null) {
+          imageUrl = mc?.$?.url || mc?.url || null;
+        } else if (typeof mc === 'string') {
+          imageUrl = mc;
+        }
+      } else if (item['media:thumbnail']) {
+        const mt = item['media:thumbnail'];
+        if (Array.isArray(mt)) {
+          imageUrl = mt[0]?.$?.url || mt[0]?.url || null;
+        } else if (typeof mt === 'object' && mt !== null) {
+          imageUrl = mt?.$?.url || mt?.url || null;
+        }
+      } else if (item.image) {
+        imageUrl = typeof item.image === 'string' ? item.image : item.image?.url;
+      }
+    } catch (mediaError) {
+      logger.warn(`Error extracting media for item: ${mediaError.message}`);
+      imageUrl = null;
     }
 
     // Calculate reading time and word count
@@ -77,8 +118,8 @@ class RSSParserService {
       title: this.cleanText(item.title),
       content: this.cleanText(content),
       summary: this.cleanText(summary),
-      url: item.link,
-      guid: item.guid || item.link,
+      url: url,
+      guid: item.guid || url,
       author: item.creator || item.author || null,
       published_date: item.pubDate ? new Date(item.pubDate) : new Date(),
       publication_id: publicationId,
