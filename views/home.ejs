@@ -33,7 +33,7 @@
                         <article class="article-card">
                             <div class="article-meta">
                                 <span class="publication-name"><%= article.publication_name %></span>
-                                <span class="publish-date"><%= new Date(article.published_at).toLocaleDateString() %></span>
+                                <span class="publish-date"><%= article.published_date ? new Date(article.published_date).toLocaleDateString() : 'No date' %></span>
                             </div>
                             <h2 class="article-title">
                                 <a href="/articles/<%= article.id %>"><%= article.title %></a>

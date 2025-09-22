@@ -22,6 +22,9 @@ router.get('/', async (req, res, next) => {
       userId: null
     });
     console.log(`Found ${articles.length} articles`);
+    if (articles.length > 0) {
+      console.log('First article:', JSON.stringify(articles[0], null, 2));
+    }
     
     console.log('Fetching publications...');
     // Get publications for filter
