@@ -1,5 +1,4 @@
 const Parser = require('rss-parser');
-const { extract } = require('@extractus/article-extractor');
 const Article = require('../models/Article');
 const Publication = require('../models/Publication');
 const logger = require('../utils/logger');
@@ -65,7 +64,11 @@ class RSSParserService {
   async extractFullContent(url) {
     try {
       logger.info(`Extracting full content from: ${url}`);
+      
+      // Dynamic import for ES module
+      const { extract } = await import('@extractus/article-extractor');
       const article = await extract(url);
+      
       return {
         title: article?.title || null,
         content: article?.content || null,
