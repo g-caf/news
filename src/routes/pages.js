@@ -14,11 +14,12 @@ router.get('/', async (req, res, next) => {
     const publicationId = req.query.publication || null;
     
     console.log('Fetching articles...');
-    // Get articles
-    const articles = await Article.getAll({
+    // Get articles (without user context for now)
+    const articles = await Article.findAll({
       limit,
       offset,
-      publicationId
+      publicationId,
+      userId: null
     });
     console.log(`Found ${articles.length} articles`);
     
@@ -58,7 +59,7 @@ router.get('/publications', async (req, res, next) => {
 // Article detail page
 router.get('/articles/:id', async (req, res, next) => {
   try {
-    const article = await Article.getById(req.params.id);
+    const article = await Article.findById(req.params.id, null);
     
     if (!article) {
       return res.status(404).render('errors/404', { title: 'Article Not Found' });
@@ -90,18 +91,22 @@ router.get('/articles/:id', async (req, res, next) => {
 // Search page
 router.get('/search', async (req, res, next) => {
   try {
-    const query = req.query.q || '';
+    const searchQuery = req.query.q || '';
     const limit = 50;
     
     let articles = [];
-    if (query.trim()) {
-      articles = await Article.search(query, { limit });
+    if (searchQuery.trim()) {
+      articles = await Article.findAll({ 
+        search: searchQuery, 
+        limit,
+        userId: null 
+      });
     }
     
     res.render('search', {
-      title: query ? `Search: ${query}` : 'Search',
+      title: searchQuery ? `Search: ${searchQuery}` : 'Search',
       articles,
-      query
+      query: searchQuery
     });
   } catch (error) {
     next(error);
