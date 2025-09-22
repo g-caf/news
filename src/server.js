@@ -59,10 +59,15 @@ app.use('/api', limiter);
 // Static assets
 const publicPath = path.join(__dirname, '..', 'public');
 console.log('Serving static files from:', publicPath);
-app.use('/assets', express.static(publicPath, { 
-  maxAge: '1y', 
-  immutable: true 
-}));
+console.log('Public directory exists:', fs.existsSync(publicPath));
+if (fs.existsSync(publicPath)) {
+  console.log('Public directory contents:', fs.readdirSync(publicPath));
+}
+
+app.use('/assets', express.static(publicPath));
+
+// Also serve from root for fallback
+app.use(express.static(publicPath));
 
 // Compression and parsing middleware
 app.use(compression());
