@@ -19,6 +19,7 @@ const seedData = {
     }
   ],
   publications: [
+    // Tech publications
     {
       name: 'TechCrunch',
       rss_url: 'https://techcrunch.com/feed/',
@@ -34,13 +35,6 @@ const seedData = {
       category: 'Technology'
     },
     {
-      name: 'BBC News',
-      rss_url: 'http://feeds.bbci.co.uk/news/rss.xml',
-      website_url: 'https://www.bbc.com/news',
-      description: 'BBC News provides trusted World and UK news',
-      category: 'News'
-    },
-    {
       name: 'The Verge',
       rss_url: 'https://www.theverge.com/rss/index.xml',
       website_url: 'https://www.theverge.com',
@@ -49,10 +43,60 @@ const seedData = {
     },
     {
       name: 'Ars Technica',
-      rss_url: 'http://feeds.arstechnica.com/arstechnica/index',
+      rss_url: 'https://feeds.arstechnica.com/arstechnica/index',
       website_url: 'https://arstechnica.com',
       description: 'Technology news and analysis',
       category: 'Technology'
+    },
+    {
+      name: 'Wired',
+      rss_url: 'https://www.wired.com/feed/rss',
+      website_url: 'https://www.wired.com',
+      description: 'Science, Technology, Business, Culture',
+      category: 'Technology'
+    },
+    // News publications
+    {
+      name: 'BBC News',
+      rss_url: 'https://feeds.bbci.co.uk/news/rss.xml',
+      website_url: 'https://www.bbc.com/news',
+      description: 'BBC News provides trusted World and UK news',
+      category: 'News'
+    },
+    {
+      name: 'The New York Times',
+      rss_url: 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml',
+      website_url: 'https://www.nytimes.com',
+      description: 'Breaking news, world news & multimedia',
+      category: 'News'
+    },
+    {
+      name: 'The Atlantic',
+      rss_url: 'https://www.theatlantic.com/feed/all/',
+      website_url: 'https://www.theatlantic.com',
+      description: 'News, politics, culture, technology, health, and more',
+      category: 'News'
+    },
+    {
+      name: 'The New Yorker',
+      rss_url: 'https://www.newyorker.com/feed/everything',
+      website_url: 'https://www.newyorker.com',
+      description: 'News, politics, culture, humor, and cartoons',
+      category: 'Culture'
+    },
+    {
+      name: 'New York Magazine',
+      rss_url: 'http://feeds.feedburner.com/nymag/intelligencer',
+      website_url: 'https://nymag.com/intelligencer',
+      description: 'Intelligencer - Politics and news',
+      category: 'News'
+    },
+    {
+      name: 'The Cut',
+      rss_url: 'http://feeds.feedburner.com/nymag/fashion',
+      website_url: 'https://www.thecut.com',
+      description: 'Fashion, beauty, and lifestyle news',
+      category: 'Culture'
     }
   ]
 };
