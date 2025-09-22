@@ -8,20 +8,26 @@ const Publication = require('../models/Publication');
 // Home page - latest articles
 router.get('/', async (req, res, next) => {
   try {
+    console.log('Home page route hit');
     const limit = 20;
     const offset = parseInt(req.query.offset) || 0;
     const publicationId = req.query.publication || null;
     
+    console.log('Fetching articles...');
     // Get articles
     const articles = await Article.getAll({
       limit,
       offset,
       publicationId
     });
+    console.log(`Found ${articles.length} articles`);
     
+    console.log('Fetching publications...');
     // Get publications for filter
     const publications = await Publication.getAll();
+    console.log(`Found ${publications.length} publications`);
     
+    console.log('Rendering home template...');
     res.render('home', {
       title: 'Latest Stories',
       articles,
@@ -30,6 +36,7 @@ router.get('/', async (req, res, next) => {
       offset
     });
   } catch (error) {
+    console.error('Home page error:', error);
     next(error);
   }
 });
