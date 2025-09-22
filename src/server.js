@@ -57,7 +57,9 @@ const limiter = rateLimit({
 app.use('/api', limiter);
 
 // Static assets
-app.use('/assets', express.static(path.join(__dirname, '..', 'public'), { 
+const publicPath = path.join(__dirname, '..', 'public');
+console.log('Serving static files from:', publicPath);
+app.use('/assets', express.static(publicPath, { 
   maxAge: '1y', 
   immutable: true 
 }));
