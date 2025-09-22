@@ -1,6 +1,7 @@
 const Parser = require('rss-parser');
 const Article = require('../models/Article');
 const Publication = require('../models/Publication');
+const articleTagger = require('./articleTagger');
 const logger = require('../utils/logger');
 
 class RSSParserService {
@@ -150,6 +151,10 @@ class RSSParserService {
     const wordCount = this.countWords(content);
     const readingTime = Math.ceil(wordCount / 200); // Assuming 200 words per minute
 
+    // Auto-tag the article based on content
+    const tags = articleTagger.tagArticle(item.title, content, summary);
+    logger.debug(`Article "${item.title}" tagged with: ${tags.join(', ')}`);
+
     return {
       title: this.cleanText(item.title),
       content: this.cleanText(content),
@@ -161,7 +166,8 @@ class RSSParserService {
       publication_id: publicationId,
       image_url: imageUrl,
       word_count: wordCount,
-      reading_time: readingTime
+      reading_time: readingTime,
+      tags: JSON.stringify(tags)
     };
   }
 

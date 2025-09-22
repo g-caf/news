@@ -4,6 +4,7 @@ const sanitizeHtml = require('sanitize-html');
 
 const Article = require('../models/Article');
 const Publication = require('../models/Publication');
+const articleTagger = require('../services/articleTagger');
 
 // Home page - latest articles
 router.get('/', async (req, res, next) => {
@@ -13,6 +14,7 @@ router.get('/', async (req, res, next) => {
     const offset = parseInt(req.query.offset) || 0;
     const publicationId = req.query.publication || null;
     const category = req.query.category || null;
+    const tag = req.query.tag || null;
     
     console.log('Fetching articles...');
     // Get articles (without user context for now)
@@ -21,6 +23,7 @@ router.get('/', async (req, res, next) => {
       offset,
       publicationId,
       category,
+      tag,
       userId: null
     });
     console.log(`Found ${articles.length} articles`);
@@ -36,14 +39,19 @@ router.get('/', async (req, res, next) => {
     );
     const categories = categoryResult.rows.map(row => row.category);
     
+    // Get all available topic tags
+    const topicTags = articleTagger.getAllTopics();
+    
     console.log('Rendering home template...');
     res.render('home', {
       title: 'Latest Stories',
       articles,
       publications,
       categories,
+      topicTags,
       selectedPublication: publicationId,
       selectedCategory: category,
+      selectedTag: tag,
       offset
     });
   } catch (error) {

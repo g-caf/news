@@ -7,6 +7,7 @@ class Article {
       offset = 0,
       publicationId,
       category,
+      tag,
       userId,
       isRead,
       isSaved,
@@ -38,6 +39,13 @@ class Article {
       params.push(category);
       paramCount++;
     }
+
+    if (tag) {
+      sql += ` AND a.tags::jsonb ? $${paramCount}`;
+      params.push(tag);
+      paramCount++;
+    }
+
     if (isRead !== undefined) {
       sql += ` AND COALESCE(ua.is_read, false) = $${paramCount}`;
       params.push(isRead);
@@ -113,15 +121,16 @@ class Article {
       publication_id,
       image_url,
       word_count,
-      reading_time
+      reading_time,
+      tags
     } = data;
 
     const sql = `
       INSERT INTO articles (
         title, content, summary, url, guid, author, published_date,
-        publication_id, image_url, word_count, reading_time
+        publication_id, image_url, word_count, reading_time, tags
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
       ON CONFLICT (url, publication_id) DO UPDATE SET
         title = EXCLUDED.title,
         content = EXCLUDED.content,
@@ -130,13 +139,14 @@ class Article {
         published_date = EXCLUDED.published_date,
         image_url = EXCLUDED.image_url,
         word_count = EXCLUDED.word_count,
-        reading_time = EXCLUDED.reading_time
+        reading_time = EXCLUDED.reading_time,
+        tags = EXCLUDED.tags
       RETURNING *
     `;
 
     const result = await query(sql, [
       title, content, summary, url, guid, author, published_date,
-      publication_id, image_url, word_count, reading_time
+      publication_id, image_url, word_count, reading_time, tags
     ]);
     
     return result.rows[0];
