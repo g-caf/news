@@ -33,11 +33,6 @@ class Article {
       paramCount++;
     }
 
-    if (category) {
-      sql += ` AND p.category = $${paramCount}`;
-      params.push(category);
-      paramCount++;
-    }
     if (isRead !== undefined) {
       sql += ` AND COALESCE(ua.is_read, false) = $${paramCount}`;
       params.push(isRead);

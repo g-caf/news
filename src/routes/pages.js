@@ -12,6 +12,7 @@ router.get('/', async (req, res, next) => {
     const limit = 20;
     const offset = parseInt(req.query.offset) || 0;
     const publicationId = req.query.publication || null;
+    const category = req.query.category || null;
     
     console.log('Fetching articles...');
     // Get articles (without user context for now)
@@ -19,24 +20,30 @@ router.get('/', async (req, res, next) => {
       limit,
       offset,
       publicationId,
+      category,
       userId: null
     });
     console.log(`Found ${articles.length} articles`);
-    if (articles.length > 0) {
-      console.log('First article:', JSON.stringify(articles[0], null, 2));
-    }
     
-    console.log('Fetching publications...');
+    console.log('Fetching publications and categories...');
     // Get publications for filter
     const publications = await Publication.getAll();
     console.log(`Found ${publications.length} publications`);
+    
+    // Get unique categories
+    const categoryResult = await require('../config/database').query(
+      'SELECT DISTINCT category FROM publications WHERE is_active = true AND category IS NOT NULL ORDER BY category'
+    );
+    const categories = categoryResult.rows.map(row => row.category);
     
     console.log('Rendering home template...');
     res.render('home', {
       title: 'Latest Stories',
       articles,
       publications,
+      categories,
       selectedPublication: publicationId,
+      selectedCategory: category,
       offset
     });
   } catch (error) {

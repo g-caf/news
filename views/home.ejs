@@ -10,9 +10,21 @@
             </div>
             
             <div class="filter-section">
+                <h3>Filter by subject:</h3>
+                <div class="publication-filters">
+                    <a href="/" class="filter-btn <%= !selectedCategory && !selectedPublication ? 'active' : '' %>">All</a>
+                    <% categories.forEach(category => { %>
+                        <a href="/?category=<%= encodeURIComponent(category) %>" 
+                           class="filter-btn <%= selectedCategory === category ? 'active' : '' %>">
+                            <%= category %>
+                        </a>
+                    <% }) %>
+                </div>
+            </div>
+            
+            <div class="filter-section">
                 <h3>Filter by publication:</h3>
                 <div class="publication-filters">
-                    <a href="/" class="filter-btn <%= !selectedPublication ? 'active' : '' %>">All</a>
                     <% publications.forEach(pub => { %>
                         <a href="/?publication=<%= pub.id %>" 
                            class="filter-btn <%= selectedPublication == pub.id ? 'active' : '' %>">

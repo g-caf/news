@@ -100,7 +100,8 @@ class Publication {
 
   // Alias methods for consistency with page routes
   static async getAll() {
-    return this.findAll(true);
+    const result = await query('SELECT DISTINCT * FROM publications WHERE is_active = true ORDER BY name');
+    return result.rows;
   }
 
   static async getAllWithStats() {
