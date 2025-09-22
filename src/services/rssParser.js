@@ -1,4 +1,5 @@
 const Parser = require('rss-parser');
+const { extract } = require('@extractus/article-extractor');
 const Article = require('../models/Article');
 const Publication = require('../models/Publication');
 const logger = require('../utils/logger');
@@ -34,7 +35,7 @@ class RSSParserService {
 
       for (const item of feed.items) {
         try {
-          const article = this.extractArticleData(item, publication.id);
+          const article = await this.extractArticleData(item, publication.id);
           if (article) {
             articles.push(article);
           }
@@ -61,7 +62,23 @@ class RSSParserService {
     }
   }
 
-  extractArticleData(item, publicationId) {
+  async extractFullContent(url) {
+    try {
+      logger.info(`Extracting full content from: ${url}`);
+      const article = await extract(url);
+      return {
+        title: article?.title || null,
+        content: article?.content || null,
+        author: article?.author || null,
+        publishedTime: article?.published || null
+      };
+    } catch (error) {
+      logger.warn(`Failed to extract full content from ${url}: ${error.message}`);
+      return null;
+    }
+  }
+
+  async extractArticleData(item, publicationId) {
     // Get URL from various possible fields
     const url = (item.link && typeof item.link === 'string' ? item.link : item.link?.href) ||
                 item['feedburner:origLink'] ||
@@ -74,8 +91,24 @@ class RSSParserService {
     // Extract content from various fields
     let content = item.content || item['content:encoded'] || item.contentSnippet || item.summary || '';
     let summary = item.summary || item.excerpt || '';
+    let author = item.creator || item.author || null;
     
-    // If no summary, create one from content
+    // Try to extract full article content from the URL
+    const fullContent = await this.extractFullContent(url);
+    if (fullContent) {
+      // Use extracted full content if available
+      if (fullContent.content && fullContent.content.length > content.length) {
+        content = fullContent.content;
+      }
+      if (fullContent.author && !author) {
+        author = fullContent.author;
+      }
+      if (!summary && fullContent.content) {
+        summary = this.createSummary(fullContent.content);
+      }
+    }
+    
+    // If still no summary, create one from whatever content we have
     if (!summary && content) {
       summary = this.createSummary(content);
     }
@@ -120,7 +153,7 @@ class RSSParserService {
       summary: this.cleanText(summary),
       url: url,
       guid: item.guid || url,
-      author: item.creator || item.author || null,
+      author: author,
       published_date: item.pubDate ? new Date(item.pubDate) : new Date(),
       publication_id: publicationId,
       image_url: imageUrl,

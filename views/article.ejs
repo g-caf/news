@@ -7,28 +7,38 @@
             <article class="article-full">
                 <div class="article-meta">
                     <span class="publication-name"><%= article.publication_name %></span>
-                    <span class="publish-date"><%= new Date(article.published_at).toLocaleString() %></span>
+                    <span class="publish-date"><%= article.published_date ? new Date(article.published_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'No date' %></span>
                 </div>
                 
                 <h1 class="article-title"><%= article.title %></h1>
                 
-                <% if (article.description) { %>
-                    <div class="article-summary">
-                        <%= article.description %>
+                <% if (article.author) { %>
+                    <div class="article-byline">
+                        By <strong><%= article.author %></strong>
                     </div>
                 <% } %>
                 
-                <div class="article-actions">
-                    <a href="<%= article.url %>" target="_blank" rel="noopener noreferrer" class="read-original-btn">
-                        Read Original Article →
-                    </a>
-                </div>
+                <% if (article.summary && article.summary !== article.content) { %>
+                    <div class="article-summary">
+                        <%= article.summary %>
+                    </div>
+                <% } %>
                 
                 <% if (article.content && article.content.trim()) { %>
                     <div class="article-content">
                         <%- sanitizedContent %>
                     </div>
+                <% } else { %>
+                    <div class="article-content">
+                        <p><em>Full article content is not available. Please read the original article.</em></p>
+                    </div>
                 <% } %>
+                
+                <div class="article-actions">
+                    <a href="<%= article.url %>" target="_blank" rel="noopener noreferrer" class="read-original-btn">
+                        View Original Article
+                    </a>
+                </div>
                 
                 <div class="article-footer">
                     <p>

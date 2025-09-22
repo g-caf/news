@@ -33,17 +33,23 @@
                         <article class="article-card">
                             <div class="article-meta">
                                 <span class="publication-name"><%= article.publication_name %></span>
-                                <span class="publish-date"><%= article.published_date ? new Date(article.published_date).toLocaleDateString() : 'No date' %></span>
+                                <span class="publish-date"><%= article.published_date ? new Date(article.published_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'No date' %></span>
                             </div>
                             <h2 class="article-title">
                                 <a href="/articles/<%= article.id %>"><%= article.title %></a>
                             </h2>
-                            <% if (article.description) { %>
-                                <p class="article-description"><%= article.description %></p>
+                            <% if (article.author) { %>
+                                <div class="article-byline">
+                                    By <strong><%= article.author %></strong>
+                                </div>
+                            <% } %>
+                            <% if (article.summary) { %>
+                                <p class="article-description"><%= article.summary %></p>
                             <% } %>
                             <div class="article-actions">
+                                <a href="/articles/<%= article.id %>" class="read-full">Read Full Article</a>
                                 <a href="<%= article.url %>" target="_blank" rel="noopener noreferrer" class="read-original">
-                                    Read Original →
+                                    View Original
                                 </a>
                             </div>
                         </article>
