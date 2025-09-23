@@ -210,7 +210,7 @@ class RSSParserService {
 
     return {
       title: this.cleanText(item.title),
-      content: this.cleanText(content),
+      content: this.cleanHtml(content), // Keep HTML formatting for display
       summary: this.cleanText(summary),
       url: url,
       guid: item.guid || url,
@@ -249,8 +249,19 @@ class RSSParserService {
     if (!text) return '';
     
     return text
-      .replace(/<[^>]*>/g, '') // Remove HTML tags
+      .replace(/<script[^>]*>.*?<\/script>/gi, '') // Remove scripts
+      .replace(/<style[^>]*>.*?<\/style>/gi, '')   // Remove styles  
       .replace(/\s+/g, ' ')    // Normalize whitespace
+      .trim();
+  }
+
+  // Keep HTML formatting for content display
+  cleanHtml(text) {
+    if (!text) return '';
+    
+    return text
+      .replace(/<script[^>]*>.*?<\/script>/gi, '') // Remove scripts
+      .replace(/<style[^>]*>.*?<\/style>/gi, '')   // Remove styles
       .trim();
   }
 
