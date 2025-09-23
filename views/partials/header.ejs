@@ -5,13 +5,7 @@
         </h1>
         
         <div class="filter-controls">
-            <select name="topic" class="filter-select" onchange="
-                console.log('Topic changed:', this.value);
-                const url = new URL(window.location.href);
-                url.searchParams.delete('tag'); url.searchParams.delete('category'); url.searchParams.delete('offset');
-                if (this.value) url.searchParams.set('tag', this.value);
-                window.location.href = url.toString();
-            ">
+            <select name="topic" class="filter-select" onchange="changeFilter('tag', this.value)">
                 <option value="">All Topics</option>
                 <% if (typeof topicTags !== 'undefined') { %>
                     <% topicTags.forEach(tag => { %>
@@ -20,13 +14,7 @@
                 <% } %>
             </select>
             
-            <select name="category" class="filter-select" onchange="
-                console.log('Category changed:', this.value);
-                const url = new URL(window.location.href);
-                url.searchParams.delete('tag'); url.searchParams.delete('category'); url.searchParams.delete('offset');
-                if (this.value) url.searchParams.set('category', this.value);
-                window.location.href = url.toString();
-            ">
+            <select name="category" class="filter-select" onchange="changeFilter('category', this.value)">
                 <option value="">All Types</option>
                 <% if (typeof categories !== 'undefined') { %>
                     <% categories.forEach(category => { %>
