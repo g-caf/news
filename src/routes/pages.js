@@ -81,71 +81,50 @@ router.get('/publications', async (req, res, next) => {
   }
 });
 
-// Article detail page
+// Article detail page - simplified for debugging
 router.get('/articles/:id', async (req, res, next) => {
   try {
+    console.log('=== ARTICLE ROUTE DEBUG ===');
     console.log('Loading article ID:', req.params.id);
+    
+    // Test database connection first
+    const testQuery = await require('../config/database').query('SELECT 1 as test');
+    console.log('Database connection OK:', testQuery.rows[0]);
+    
     const article = await Article.findById(req.params.id, null);
+    console.log('Article query result:', !!article);
     
     if (!article) {
       console.log('Article not found:', req.params.id);
       return res.status(404).render('errors/404', { title: 'Article Not Found' });
     }
     
-    // Safe date formatting to prevent template crashes
-    function safeFormatDate(value, locale, options) {
-      if (!value) return null;
-      const d = value instanceof Date ? value : new Date(value);
-      if (Number.isNaN(d.getTime())) return null;
-      try { 
-        return d.toLocaleDateString(locale || 'en-US', options); 
-      } catch { 
-        return null; 
-      }
-    }
-
-    const displayDateLong = safeFormatDate(article.published_date, 'en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    console.log('Raw article data:', JSON.stringify(article, null, 2));
     
-    console.log('Article found:', {
-      title: article.title,
-      contentLength: article.content ? article.content.length : 0,
-      summaryLength: article.summary ? article.summary.length : 0,
-      hasImageUrl: !!article.image_url,
-      hasAuthor: !!article.author,
-      publishedDate: article.published_date,
-      displayDateLong: displayDateLong
+    // Just send back basic JSON for now to test
+    res.json({
+      success: true,
+      article: {
+        id: article.id,
+        title: article.title,
+        author: article.author,
+        published_date: article.published_date,
+        publication_name: article.publication_name,
+        url: article.url,
+        content_length: article.content ? article.content.length : 0,
+        summary_length: article.summary ? article.summary.length : 0
+      }
     });
     
-    // Sanitize HTML content if it exists
-    let sanitizedContent = '';
-    try {
-      if (article.content && article.content.trim()) {
-        sanitizedContent = sanitizeHtml(article.content, {
-          allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'figure', 'figcaption']),
-          allowedAttributes: {
-            a: ['href', 'name', 'target', 'rel'],
-            img: ['src', 'alt', 'title', 'loading', 'decoding'],
-            '*': ['class']
-          }
-        });
-        console.log('Sanitized content length:', sanitizedContent.length);
-      } else {
-        console.log('No content to sanitize');
-      }
-    } catch (sanitizeError) {
-      console.error('Error sanitizing content:', sanitizeError);
-      sanitizedContent = '<p>Content could not be processed safely.</p>';
-    }
-    
-    res.render('article', {
-      title: article.title || 'Article',
-      article: article,
-      sanitizedContent: sanitizedContent,
-      displayDateLong: displayDateLong
-    });
   } catch (error) {
-    console.error('Article route error:', error);
-    next(error);
+    console.error('=== ARTICLE ROUTE ERROR ===');
+    console.error('Error details:', error);
+    console.error('Stack trace:', error.stack);
+    res.status(500).json({ 
+      error: 'Article route failed', 
+      message: error.message,
+      stack: error.stack 
+    });
   }
 });
 
