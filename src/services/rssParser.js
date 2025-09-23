@@ -97,20 +97,19 @@ class RSSParserService {
     let summary = item.summary || item.excerpt || '';
     let author = item.creator || item.author || null;
     
-    // Try to extract full article content from the URL
-    const fullContent = await this.extractFullContent(url);
-    if (fullContent) {
-      // Use extracted full content if available
-      if (fullContent.content && fullContent.content.length > content.length) {
-        content = fullContent.content;
-      }
-      if (fullContent.author && !author) {
-        author = fullContent.author;
-      }
-      if (!summary && fullContent.content) {
-        summary = this.createSummary(fullContent.content);
-      }
-    }
+    // Temporarily disable full content extraction to fix stability
+    // const fullContent = await this.extractFullContent(url);
+    // if (fullContent) {
+    //   if (fullContent.content && fullContent.content.length > content.length) {
+    //     content = fullContent.content;
+    //   }
+    //   if (fullContent.author && !author) {
+    //     author = fullContent.author;
+    //   }
+    //   if (!summary && fullContent.content) {
+    //     summary = this.createSummary(fullContent.content);
+    //   }
+    // }
     
     // If still no summary, create one from whatever content we have
     if (!summary && content) {
@@ -151,11 +150,11 @@ class RSSParserService {
     const wordCount = this.countWords(content);
     const readingTime = Math.ceil(wordCount / 200); // Assuming 200 words per minute
 
-    // Auto-tag the article based on content
-    const tags = articleTagger.tagArticle(item.title, content, summary);
-    logger.debug(`Article "${item.title}" tagged with: ${tags.join(', ')}`);
+    // Auto-tag the article based on content (disable until DB is stable)
+    // const tags = articleTagger.tagArticle(item.title, content, summary);
+    // logger.debug(`Article "${item.title}" tagged with: ${tags.join(', ')}`);
 
-    return {
+    const articleData = {
       title: this.cleanText(item.title),
       content: this.cleanText(content),
       summary: this.cleanText(summary),
@@ -166,9 +165,13 @@ class RSSParserService {
       publication_id: publicationId,
       image_url: imageUrl,
       word_count: wordCount,
-      reading_time: readingTime,
-      tags: JSON.stringify(tags)
+      reading_time: readingTime
     };
+    
+    // Only add tags if the column exists (after migration runs)
+    // articleData.tags = JSON.stringify(tags || []);
+    
+    return articleData;
   }
 
   createSummary(content, maxLength = 300) {
