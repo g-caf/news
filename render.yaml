@@ -10,7 +10,7 @@ services:
     name: newshub
     runtime: node
     plan: starter
-    buildCommand: npm ci && npm run migrate && npm run seed
+    buildCommand: npm ci && npm run migrate && node src/migrations/add-tags-to-articles.js && npm run seed
     startCommand: npm start
     healthCheckPath: /api/health
     envVars:
