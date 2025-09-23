@@ -115,25 +115,9 @@ class RSSParserService {
     let summary = item.summary || item.excerpt || '';
     let author = item.creator || item.author || null;
     
-    // Try to extract full article content (with robust error handling)
-    try {
-      const fullContent = await this.extractFullContent(url);
-      if (fullContent) {
-        if (fullContent.content && fullContent.content.length > content.length) {
-          content = fullContent.content;
-          logger.info(`Used extracted content for: ${item.title}`);
-        }
-        if (fullContent.author && !author) {
-          author = fullContent.author;
-        }
-        if (!summary && fullContent.content) {
-          summary = this.createSummary(fullContent.content);
-        }
-      }
-    } catch (extractError) {
-      logger.warn(`Content extraction failed for ${item.title}: ${extractError.message}`);
-      // Continue with RSS content only
-    }
+    // Skip content extraction for now to get basic functionality working
+    // We'll re-enable this once the site is stable
+    logger.debug(`Using RSS content only for: ${item.title}`);
     
     // If still no summary, create one from whatever content we have
     if (!summary && content) {
@@ -174,16 +158,16 @@ class RSSParserService {
     const wordCount = this.countWords(content);
     const readingTime = Math.ceil(wordCount / 200); // Assuming 200 words per minute
 
-    // Auto-tag the article based on content
-    let tags = [];
-    try {
-      tags = articleTagger.tagArticle(item.title, content, summary);
-      logger.debug(`Article "${item.title}" tagged with: ${tags.join(', ')}`);
-    } catch (tagError) {
-      logger.warn(`Tagging failed for ${item.title}: ${tagError.message}`);
-    }
+    // Skip tagging for now to ensure stability
+    // let tags = [];
+    // try {
+    //   tags = articleTagger.tagArticle(item.title, content, summary);
+    //   logger.debug(`Article "${item.title}" tagged with: ${tags.join(', ')}`);
+    // } catch (tagError) {
+    //   logger.warn(`Tagging failed for ${item.title}: ${tagError.message}`);
+    // }
 
-    const articleData = {
+    return {
       title: this.cleanText(item.title),
       content: this.cleanText(content),
       summary: this.cleanText(summary),
@@ -196,13 +180,6 @@ class RSSParserService {
       word_count: wordCount,
       reading_time: readingTime
     };
-    
-    // Add tags if we have them (will be ignored if column doesn't exist)
-    if (tags.length > 0) {
-      articleData.tags = JSON.stringify(tags);
-    }
-    
-    return articleData;
   }
 
   createSummary(content, maxLength = 300) {
