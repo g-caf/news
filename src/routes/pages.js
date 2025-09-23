@@ -101,19 +101,22 @@ router.get('/articles/:id', async (req, res, next) => {
     
     console.log('Raw article data:', JSON.stringify(article, null, 2));
     
-    // Just send back basic JSON for now to test
-    res.json({
-      success: true,
-      article: {
-        id: article.id,
-        title: article.title,
-        author: article.author,
-        published_date: article.published_date,
-        publication_name: article.publication_name,
-        url: article.url,
-        content_length: article.content ? article.content.length : 0,
-        summary_length: article.summary ? article.summary.length : 0
-      }
+    // Safe date formatting
+    const displayDateLong = article.published_date ? 
+      new Date(article.published_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 
+      'No date';
+    
+    // Basic sanitized content
+    let sanitizedContent = '';
+    if (article.content && article.content.trim()) {
+      sanitizedContent = article.content.replace(/<script[^>]*>.*?<\/script>/gi, '');
+    }
+    
+    res.render('article', {
+      title: article.title || 'Article',
+      article: article,
+      sanitizedContent: sanitizedContent,
+      displayDateLong: displayDateLong
     });
     
   } catch (error) {
