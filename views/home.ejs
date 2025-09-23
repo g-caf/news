@@ -36,21 +36,6 @@
                         </div>
                     </article>
                 <% }) %>
-                
-                <% if (articles.length >= 20) { %>
-                    <div class="load-more-tile">
-                        <% 
-                        const params = new URLSearchParams();
-                        params.set('offset', (offset || 0) + 20);
-                        if (selectedPublication) params.set('publication', selectedPublication);
-                        if (selectedCategory) params.set('category', selectedCategory);
-                        if (selectedTag) params.set('tag', selectedTag);
-                        %>
-                        <a href="?<%= params.toString() %>" class="load-more-content">
-                            <div class="load-more-text">Load More</div>
-                        </a>
-                    </div>
-                <% } %>
             <% } %>
         </div>
     </main>

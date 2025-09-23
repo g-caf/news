@@ -194,7 +194,7 @@
         
         /* Fallback for articles without images */
         .article-card.no-image {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #c5282f 0%, #8b1e24 100%);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -323,25 +323,49 @@
         // Test if JS is loading
         console.log('HEAD JavaScript loaded');
         
-        // Test filter function
-        function applyFilter(filterType, value) {
-            console.log('applyFilter called:', filterType, value);
+        // Infinite scroll functionality
+        let isLoading = false;
+        let currentOffset = <%= offset || 0 %>;
+        const hasMoreContent = <%= articles.length >= 20 ? 'true' : 'false' %>;
+        
+        function loadMoreArticles() {
+            if (isLoading || !hasMoreContent) return;
+            
+            isLoading = true;
+            console.log('Loading more articles...');
+            
             const url = new URL(window.location.href);
+            url.searchParams.set('offset', currentOffset + 20);
             
-            // Clear existing filters
-            url.searchParams.delete('tag');
-            url.searchParams.delete('category');
-            url.searchParams.delete('publication');
-            url.searchParams.delete('offset');
-            
-            // Set new filter if value provided
-            if (value) {
-                url.searchParams.set(filterType, value);
-            }
-            
-            console.log('Redirecting to:', url.toString());
-            window.location.href = url.toString();
+            // Use fetch to load more content
+            fetch(url.toString())
+                .then(response => response.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const newTiles = doc.querySelectorAll('.article-card');
+                    const grid = document.querySelector('.articles-grid');
+                    
+                    newTiles.forEach(tile => {
+                        grid.appendChild(tile.cloneNode(true));
+                    });
+                    
+                    currentOffset += 20;
+                    isLoading = false;
+                    console.log('Loaded more articles, new offset:', currentOffset);
+                })
+                .catch(error => {
+                    console.error('Error loading more articles:', error);
+                    isLoading = false;
+                });
         }
+        
+        // Scroll detection
+        window.addEventListener('scroll', () => {
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 1000) {
+                loadMoreArticles();
+            }
+        });
     </script>
     <link rel="icon" href="/assets/img/favicon.ico">
 </head>
