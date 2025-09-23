@@ -36,8 +36,18 @@ if (process.env.NODE_ENV === 'production') {
   app.set('view cache', true);
 }
 
-// Security middleware
-app.use(helmet());
+// Security middleware - relax CSP for our inline styles/scripts
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "fonts.googleapis.com"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      fontSrc: ["'self'", "fonts.gstatic.com"],
+      imgSrc: ["'self'", "data:", "https:", "http:"]
+    }
+  }
+}));
 
 // CORS only in development - production serves from same origin
 if (process.env.NODE_ENV !== 'production') {
@@ -62,11 +72,20 @@ console.log('Serving static files from:', publicPath);
 console.log('Public directory exists:', fs.existsSync(publicPath));
 if (fs.existsSync(publicPath)) {
   console.log('Public directory contents:', fs.readdirSync(publicPath));
+  const cssPath = path.join(publicPath, 'css');
+  const jsPath = path.join(publicPath, 'js');
+  console.log('CSS directory exists:', fs.existsSync(cssPath));
+  console.log('JS directory exists:', fs.existsSync(jsPath));
+  if (fs.existsSync(cssPath)) {
+    console.log('CSS files:', fs.readdirSync(cssPath));
+  }
+  if (fs.existsSync(jsPath)) {
+    console.log('JS files:', fs.readdirSync(jsPath));
+  }
 }
 
+// Serve static files with explicit paths
 app.use('/assets', express.static(publicPath));
-
-// Also serve from root for fallback
 app.use(express.static(publicPath));
 
 // Compression and parsing middleware
