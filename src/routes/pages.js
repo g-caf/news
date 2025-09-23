@@ -112,12 +112,33 @@ router.get('/articles/:id', async (req, res, next) => {
       sanitizedContent = article.content.replace(/<script[^>]*>.*?<\/script>/gi, '');
     }
     
-    res.render('article', {
-      title: article.title || 'Article',
-      article: article,
-      sanitizedContent: sanitizedContent,
-      displayDateLong: displayDateLong
-    });
+    // Test with minimal template first
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>${article.title || 'Article'}</title>
+        <style>
+          body { font-family: Georgia, serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+          h1 { color: #c5282f; }
+          .meta { color: #666; margin-bottom: 20px; }
+          .content { line-height: 1.6; }
+        </style>
+      </head>
+      <body>
+        <div class="meta">
+          <strong>${article.publication_name || 'Unknown'}</strong> • ${displayDateLong}
+        </div>
+        <h1>${article.title || 'Untitled'}</h1>
+        ${article.author ? `<p><em>By ${article.author}</em></p>` : ''}
+        <div class="content">
+          ${sanitizedContent || article.summary || '<p>No content available.</p>'}
+        </div>
+        <p><a href="/">← Back to NewsHub</a></p>
+        <p><a href="${article.url}" target="_blank">View Original</a></p>
+      </body>
+      </html>
+    `);
     
   } catch (error) {
     console.error('=== ARTICLE ROUTE ERROR ===');
