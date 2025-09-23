@@ -448,22 +448,75 @@
             window.location.href = url.toString();
         }
         
-        // Add click handlers when DOM loads
+        // Initialize when DOM loads
         document.addEventListener('DOMContentLoaded', function() {
             // Add click handlers to article cards
-            document.querySelectorAll('.article-card').forEach(card => {
-                card.addEventListener('click', function(e) {
-                    // Don't navigate if clicking on a link
-                    if (e.target.tagName === 'A') return;
-                    
-                    const articleId = this.dataset.articleId;
-                    if (articleId) {
-                        window.location.href = '/articles/' + articleId;
-                    }
+            function addClickHandlers() {
+                document.querySelectorAll('.article-card').forEach(card => {
+                    card.addEventListener('click', function(e) {
+                        // Don't navigate if clicking on a link
+                        if (e.target.tagName === 'A') return;
+                        
+                        const articleId = this.dataset.articleId;
+                        if (articleId) {
+                            window.location.href = '/articles/' + articleId;
+                        }
+                    });
                 });
+            }
+            
+            addClickHandlers();
+            console.log('Article click handlers added');
+            
+            // Infinite scroll functionality
+            let isLoading = false;
+            let currentOffset = parseInt('<%= offset || 0 %>');
+            
+            function loadMoreArticles() {
+                if (isLoading) return;
+                
+                isLoading = true;
+                console.log('Loading more articles from offset:', currentOffset + 20);
+                
+                const url = new URL(window.location.href);
+                url.searchParams.set('offset', currentOffset + 20);
+                
+                fetch(url.toString())
+                    .then(response => response.text())
+                    .then(html => {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        const newTiles = doc.querySelectorAll('.article-card');
+                        const grid = document.querySelector('.articles-grid');
+                        
+                        if (newTiles.length > 0) {
+                            newTiles.forEach(tile => {
+                                grid.appendChild(tile.cloneNode(true));
+                            });
+                            
+                            currentOffset += 20;
+                            addClickHandlers(); // Re-add click handlers to new tiles
+                            console.log('Loaded', newTiles.length, 'more articles');
+                        } else {
+                            console.log('No more articles to load');
+                        }
+                        
+                        isLoading = false;
+                    })
+                    .catch(error => {
+                        console.error('Error loading more articles:', error);
+                        isLoading = false;
+                    });
+            }
+            
+            // Scroll detection
+            window.addEventListener('scroll', function() {
+                if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 1000) {
+                    loadMoreArticles();
+                }
             });
             
-            console.log('Article click handlers added');
+            console.log('Infinite scroll initialized');
         });
         
         console.log('JavaScript loaded successfully');

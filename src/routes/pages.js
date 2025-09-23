@@ -90,6 +90,9 @@ router.get('/articles/:id', async (req, res, next) => {
       return res.status(404).render('errors/404', { title: 'Article Not Found' });
     }
     
+    console.log('Article content length:', article.content ? article.content.length : 0);
+    console.log('Article summary length:', article.summary ? article.summary.length : 0);
+    
     // Sanitize HTML content if it exists
     let sanitizedContent = '';
     if (article.content && article.content.trim()) {
@@ -101,6 +104,9 @@ router.get('/articles/:id', async (req, res, next) => {
           '*': ['class']
         }
       });
+      console.log('Sanitized content length:', sanitizedContent.length);
+    } else {
+      console.log('No content available for article');
     }
     
     res.render('article', {
