@@ -3,57 +3,52 @@
     <%- include('partials/header') %>
     
     <main class="main-content">
-        <div class="container">
-            <article class="article-full">
-                <div class="article-meta">
-                    <span class="publication-name"><%= article.publication_name %></span>
-                    <span class="publish-date"><%= article.published_date ? new Date(article.published_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'No date' %></span>
-                </div>
-                
-                <h1 class="article-title"><%= article.title %></h1>
-                
-                <% if (article.author) { %>
-                    <div class="article-byline">
-                        By <strong><%= article.author %></strong>
-                    </div>
-                <% } %>
-                
-                <% if (article.summary && article.summary !== article.content) { %>
-                    <div class="article-summary">
-                        <%= article.summary %>
-                    </div>
-                <% } %>
-                
-                <% if (article.content && article.content.trim()) { %>
-                    <div class="article-content">
-                        <%- sanitizedContent %>
-                    </div>
-                <% } else { %>
-                    <div class="article-content">
-                        <p><em>Full article content is not available. Please read the original article.</em></p>
-                    </div>
-                <% } %>
-                
-                <div class="article-actions">
-                    <a href="<%= article.url %>" target="_blank" rel="noopener noreferrer" class="read-original-btn">
-                        View Original Article
-                    </a>
-                </div>
-                
-                <div class="article-footer">
-                    <p>
-                        Originally published by <strong><%= article.publication_name %></strong>
-                        on <%= new Date(article.published_at).toLocaleDateString() %>
-                    </p>
-                    <a href="<%= article.url %>" target="_blank" rel="noopener noreferrer">
-                        View original article
-                    </a>
-                </div>
-            </article>
-            
-            <div class="navigation-links">
-                <a href="/" class="back-link">← Back to Latest Stories</a>
+        <article class="article-full">
+            <div class="article-meta">
+                <span class="publication-name"><%= article.publication_name %></span>
+                <span class="publish-date"><%= article.published_date ? new Date(article.published_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'No date' %></span>
             </div>
+            
+            <h1 class="article-title"><%= article.title %></h1>
+            
+            <% if (article.author) { %>
+                <div class="article-byline">
+                    By <strong><%= article.author %></strong>
+                </div>
+            <% } %>
+            
+            <% if (article.summary && article.summary !== article.content) { %>
+                <div class="article-summary">
+                    <%= article.summary %>
+                </div>
+            <% } %>
+            
+            <% if (article.content && article.content.trim()) { %>
+                <div class="article-content">
+                    <%- sanitizedContent %>
+                </div>
+            <% } else { %>
+                <div class="article-content">
+                    <p><em>Full article content is not available. Please read the original article.</em></p>
+                </div>
+            <% } %>
+            
+            <div class="article-actions">
+                <a href="<%= article.url %>" target="_blank" rel="noopener noreferrer" class="read-original-btn">
+                    View Original Article
+                </a>
+            </div>
+            
+            <div class="article-footer">
+                <p>
+                    Originally published by <strong><%= article.publication_name %></strong>
+                    on <%= article.published_date ? new Date(article.published_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'No date' %>
+                </p>
+            </div>
+        </article>
+        
+        <div class="navigation-links">
+            <a href="/" class="back-link">← Back to NewsHub</a>
         </div>
     </main>
     
