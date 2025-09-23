@@ -54,27 +54,18 @@
                     </div>
                 <% } else { %>
                     <% articles.forEach(article => { %>
-                        <article class="article-card">
-                            <div class="article-meta">
-                                <span class="publication-name"><%= article.publication_name %></span>
-                                <span class="publish-date"><%= article.published_date ? new Date(article.published_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'No date' %></span>
-                            </div>
-                            <h2 class="article-title">
-                                <a href="/articles/<%= article.id %>"><%= article.title %></a>
-                            </h2>
-                            <% if (article.author) { %>
-                                <div class="article-byline">
-                                    By <strong><%= article.author %></strong>
+                        <article class="article-card <%= article.image_url ? '' : 'no-image' %>" onclick="window.location='/articles/<%= article.id %>'">
+                            <% if (article.image_url) { %>
+                                <img src="<%= article.image_url %>" alt="<%= article.title %>" class="article-image" loading="lazy" onerror="this.parentElement.classList.add('no-image'); this.style.display='none';">
+                            <% } %>
+                            <div class="article-overlay">
+                                <div class="article-meta">
+                                    <span class="publication-name"><%= article.publication_name %></span>
+                                    <span class="publish-date"><%= article.published_date ? new Date(article.published_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Recent' %></span>
                                 </div>
-                            <% } %>
-                            <% if (article.summary) { %>
-                                <p class="article-description"><%= article.summary %></p>
-                            <% } %>
-                            <div class="article-actions">
-                                <a href="/articles/<%= article.id %>" class="read-full">Read Full Article</a>
-                                <a href="<%= article.url %>" target="_blank" rel="noopener noreferrer" class="read-original">
-                                    View Original
-                                </a>
+                                <h2 class="article-title">
+                                    <a href="/articles/<%= article.id %>"><%= article.title %></a>
+                                </h2>
                             </div>
                         </article>
                     <% }) %>
@@ -83,8 +74,14 @@
             
             <% if (articles.length >= 20) { %>
                 <div class="pagination">
-                    <a href="?offset=<%= (offset || 0) + 20 %><%= selectedPublication ? '&publication=' + selectedPublication : '' %>" 
-                       class="load-more-btn">Load More Articles</a>
+                    <% 
+                    const params = new URLSearchParams();
+                    params.set('offset', (offset || 0) + 20);
+                    if (selectedPublication) params.set('publication', selectedPublication);
+                    if (selectedCategory) params.set('category', selectedCategory);
+                    if (selectedTag) params.set('tag', selectedTag);
+                    %>
+                    <a href="?<%= params.toString() %>" class="load-more-btn">Load More Stories</a>
                 </div>
             <% } %>
         </div>
