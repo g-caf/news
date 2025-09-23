@@ -66,16 +66,34 @@ class RSSParserService {
     try {
       logger.info(`Extracting full content from: ${url}`);
       
-      // Dynamic import for ES module
-      const { extract } = await import('@extractus/article-extractor');
-      const article = await extract(url);
+      // Set a reasonable timeout
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Extraction timeout')), 10000)
+      );
       
-      return {
-        title: article?.title || null,
-        content: article?.content || null,
-        author: article?.author || null,
-        publishedTime: article?.published || null
-      };
+      const extractionPromise = (async () => {
+        const { extract } = await import('@extractus/article-extractor');
+        return await extract(url, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (compatible; NewsHub/1.0)'
+          }
+        });
+      })();
+      
+      const article = await Promise.race([extractionPromise, timeoutPromise]);
+      
+      if (article && article.content && article.content.length > 100) {
+        logger.info(`Successfully extracted ${article.content.length} characters from ${url}`);
+        return {
+          title: article.title || null,
+          content: article.content || null,
+          author: article.author || null,
+          publishedTime: article.published || null
+        };
+      } else {
+        logger.warn(`Extracted content too short or empty from ${url}`);
+        return null;
+      }
     } catch (error) {
       logger.warn(`Failed to extract full content from ${url}: ${error.message}`);
       return null;
@@ -97,19 +115,25 @@ class RSSParserService {
     let summary = item.summary || item.excerpt || '';
     let author = item.creator || item.author || null;
     
-    // Temporarily disable full content extraction to fix stability
-    // const fullContent = await this.extractFullContent(url);
-    // if (fullContent) {
-    //   if (fullContent.content && fullContent.content.length > content.length) {
-    //     content = fullContent.content;
-    //   }
-    //   if (fullContent.author && !author) {
-    //     author = fullContent.author;
-    //   }
-    //   if (!summary && fullContent.content) {
-    //     summary = this.createSummary(fullContent.content);
-    //   }
-    // }
+    // Try to extract full article content (with robust error handling)
+    try {
+      const fullContent = await this.extractFullContent(url);
+      if (fullContent) {
+        if (fullContent.content && fullContent.content.length > content.length) {
+          content = fullContent.content;
+          logger.info(`Used extracted content for: ${item.title}`);
+        }
+        if (fullContent.author && !author) {
+          author = fullContent.author;
+        }
+        if (!summary && fullContent.content) {
+          summary = this.createSummary(fullContent.content);
+        }
+      }
+    } catch (extractError) {
+      logger.warn(`Content extraction failed for ${item.title}: ${extractError.message}`);
+      // Continue with RSS content only
+    }
     
     // If still no summary, create one from whatever content we have
     if (!summary && content) {
@@ -150,9 +174,14 @@ class RSSParserService {
     const wordCount = this.countWords(content);
     const readingTime = Math.ceil(wordCount / 200); // Assuming 200 words per minute
 
-    // Auto-tag the article based on content (disable until DB is stable)
-    // const tags = articleTagger.tagArticle(item.title, content, summary);
-    // logger.debug(`Article "${item.title}" tagged with: ${tags.join(', ')}`);
+    // Auto-tag the article based on content
+    let tags = [];
+    try {
+      tags = articleTagger.tagArticle(item.title, content, summary);
+      logger.debug(`Article "${item.title}" tagged with: ${tags.join(', ')}`);
+    } catch (tagError) {
+      logger.warn(`Tagging failed for ${item.title}: ${tagError.message}`);
+    }
 
     const articleData = {
       title: this.cleanText(item.title),
@@ -168,8 +197,10 @@ class RSSParserService {
       reading_time: readingTime
     };
     
-    // Only add tags if the column exists (after migration runs)
-    // articleData.tags = JSON.stringify(tags || []);
+    // Add tags if we have them (will be ignored if column doesn't exist)
+    if (tags.length > 0) {
+      articleData.tags = JSON.stringify(tags);
+    }
     
     return articleData;
   }

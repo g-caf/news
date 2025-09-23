@@ -128,9 +128,9 @@ class Article {
     const sql = `
       INSERT INTO articles (
         title, content, summary, url, guid, author, published_date,
-        publication_id, image_url, word_count, reading_time, tags
+        publication_id, image_url, word_count, reading_time
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
       ON CONFLICT (url, publication_id) DO UPDATE SET
         title = EXCLUDED.title,
         content = EXCLUDED.content,
@@ -139,14 +139,13 @@ class Article {
         published_date = EXCLUDED.published_date,
         image_url = EXCLUDED.image_url,
         word_count = EXCLUDED.word_count,
-        reading_time = EXCLUDED.reading_time,
-        tags = EXCLUDED.tags
+        reading_time = EXCLUDED.reading_time
       RETURNING *
     `;
 
     const result = await query(sql, [
       title, content, summary, url, guid, author, published_date,
-      publication_id, image_url, word_count, reading_time, tags
+      publication_id, image_url, word_count, reading_time
     ]);
     
     return result.rows[0];
