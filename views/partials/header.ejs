@@ -1,17 +1,32 @@
 <header class="site-header">
-    <div class="container">
-        <div class="header-content">
-            <h1 class="site-title">
-                <a href="/">📰 NewsHub</a>
-            </h1>
-            <nav class="main-nav">
-                <a href="/" class="nav-link">Latest</a>
-                <a href="/publications" class="nav-link">Publications</a>
-            </nav>
-            <form class="search-form" action="/search" method="GET">
-                <input type="search" name="q" placeholder="Search articles..." value="<%= typeof query !== 'undefined' ? query : '' %>">
-                <button type="submit">🔍</button>
-            </form>
+    <div class="header-content">
+        <h1 class="site-title">
+            <a href="/">📰 NewsHub</a>
+        </h1>
+        
+        <div class="filter-controls">
+            <select name="topic" class="filter-select" onchange="applyFilter('tag', this.value)">
+                <option value="">All Topics</option>
+                <% if (typeof topicTags !== 'undefined') { %>
+                    <% topicTags.forEach(tag => { %>
+                        <option value="<%= tag %>" <%= (typeof selectedTag !== 'undefined' && selectedTag === tag) ? 'selected' : '' %>><%= tag %></option>
+                    <% }) %>
+                <% } %>
+            </select>
+            
+            <select name="category" class="filter-select" onchange="applyFilter('category', this.value)">
+                <option value="">All Types</option>
+                <% if (typeof categories !== 'undefined') { %>
+                    <% categories.forEach(category => { %>
+                        <option value="<%= category %>" <%= (typeof selectedCategory !== 'undefined' && selectedCategory === category) ? 'selected' : '' %>><%= category %></option>
+                    <% }) %>
+                <% } %>
+            </select>
         </div>
+        
+        <form class="search-form" action="/search" method="GET">
+            <input type="search" name="q" placeholder="Search..." value="<%= typeof query !== 'undefined' ? query : '' %>">
+            <button type="submit">🔍</button>
+        </form>
     </div>
 </header>
