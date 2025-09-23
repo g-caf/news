@@ -100,15 +100,40 @@ class RSSParserService {
     }
   }
 
+  canonicalizeUrl(input) {
+    try {
+      const u = new URL(input);
+      // Lower-case host
+      u.host = u.host.toLowerCase();
+      // Remove fragment
+      u.hash = '';
+      // Strip tracking/query noise
+      const remove = [
+        'utm_source','utm_medium','utm_campaign','utm_term','utm_content','utm_id','utm_name',
+        'gclid','fbclid','mc_cid','mc_eid','WT.mc_id','WT.mc_t','ref','igshid','mkt_tok','_hsenc','_hsmi','s','ncid','cmp','cmpid'
+      ];
+      for (const k of remove) u.searchParams.delete(k);
+      // Normalize AMP variants (common duplicate source)
+      u.pathname = u.pathname.replace(/\/amp(\/)?$/i, '/');
+      // Normalize trailing slash (keep root slash, remove others)
+      if (u.pathname.length > 1) u.pathname = u.pathname.replace(/\/+$/, '');
+      return u.toString();
+    } catch {
+      return input;
+    }
+  }
+
   async extractArticleData(item, publicationId) {
-    // Get URL from various possible fields
-    const url = (item.link && typeof item.link === 'string' ? item.link : item.link?.href) ||
-                item['feedburner:origLink'] ||
-                (Array.isArray(item.links) ? item.links[0]?.href : undefined);
+    // Prefer feedburner:origLink (canonical) then normalize
+    const rawUrl = item['feedburner:origLink'] ||
+                   (typeof item.link === 'string' ? item.link : item.link?.href) ||
+                   (Array.isArray(item.links) ? item.links[0]?.href : undefined);
     
-    if (!item.title || !url) {
+    if (!item.title || !rawUrl) {
       return null;
     }
+
+    const url = this.canonicalizeUrl(rawUrl);
 
     // Extract content from various fields
     let content = item.content || item['content:encoded'] || item.contentSnippet || item.summary || '';

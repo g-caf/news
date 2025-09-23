@@ -92,13 +92,28 @@ router.get('/articles/:id', async (req, res, next) => {
       return res.status(404).render('errors/404', { title: 'Article Not Found' });
     }
     
+    // Safe date formatting to prevent template crashes
+    function safeFormatDate(value, locale, options) {
+      if (!value) return null;
+      const d = value instanceof Date ? value : new Date(value);
+      if (Number.isNaN(d.getTime())) return null;
+      try { 
+        return d.toLocaleDateString(locale || 'en-US', options); 
+      } catch { 
+        return null; 
+      }
+    }
+
+    const displayDateLong = safeFormatDate(article.published_date, 'en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    
     console.log('Article found:', {
       title: article.title,
       contentLength: article.content ? article.content.length : 0,
       summaryLength: article.summary ? article.summary.length : 0,
       hasImageUrl: !!article.image_url,
       hasAuthor: !!article.author,
-      publishedDate: article.published_date
+      publishedDate: article.published_date,
+      displayDateLong: displayDateLong
     });
     
     // Sanitize HTML content if it exists
@@ -125,7 +140,8 @@ router.get('/articles/:id', async (req, res, next) => {
     res.render('article', {
       title: article.title || 'Article',
       article: article,
-      sanitizedContent: sanitizedContent
+      sanitizedContent: sanitizedContent,
+      displayDateLong: displayDateLong
     });
   } catch (error) {
     console.error('Article route error:', error);

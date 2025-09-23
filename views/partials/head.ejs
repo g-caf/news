@@ -435,16 +435,17 @@
     <script>
         console.log('JavaScript loading...');
         
-        // Simple filter function
+        // Filter function - always go to home page
         function changeFilter(type, value) {
             console.log('Filter changing:', type, value);
-            const url = new URL(window.location.href);
+            const url = new URL('/', window.location.origin); // Always go to home page
             url.searchParams.delete('tag');
             url.searchParams.delete('category'); 
             url.searchParams.delete('offset');
             if (value) {
                 url.searchParams.set(type, value);
             }
+            console.log('Redirecting to:', url.toString());
             window.location.href = url.toString();
         }
         

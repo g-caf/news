@@ -6,7 +6,7 @@
         <article class="article-full">
             <div class="article-meta">
                 <span class="publication-name"><%= article.publication_name %></span>
-                <span class="publish-date"><%= article.published_date ? new Date(article.published_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'No date' %></span>
+                <span class="publish-date"><%= displayDateLong || 'No date' %></span>
             </div>
             
             <h1 class="article-title"><%= article.title %></h1>
@@ -42,7 +42,7 @@
             <div class="article-footer">
                 <p>
                     Originally published by <strong><%= article.publication_name %></strong>
-                    on <%= article.published_date ? new Date(article.published_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'No date' %>
+                    on <%= displayDateLong || 'No date' %>
                 </p>
             </div>
         </article>
