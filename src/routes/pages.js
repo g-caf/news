@@ -27,6 +27,13 @@ router.get('/', async (req, res, next) => {
       userId: null
     });
     console.log(`Found ${articles.length} articles`);
+    if (articles.length > 0) {
+      console.log('Sample article with image URL:', {
+        title: articles[0].title,
+        image_url: articles[0].image_url,
+        publication: articles[0].publication_name
+      });
+    }
     
     console.log('Fetching publications and categories...');
     // Get publications for filter

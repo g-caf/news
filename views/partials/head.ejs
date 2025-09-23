@@ -319,5 +319,29 @@
             font-size: 14px;
         }
     </style>
+    <script>
+        // Test if JS is loading
+        console.log('HEAD JavaScript loaded');
+        
+        // Test filter function
+        function applyFilter(filterType, value) {
+            console.log('applyFilter called:', filterType, value);
+            const url = new URL(window.location.href);
+            
+            // Clear existing filters
+            url.searchParams.delete('tag');
+            url.searchParams.delete('category');
+            url.searchParams.delete('publication');
+            url.searchParams.delete('offset');
+            
+            // Set new filter if value provided
+            if (value) {
+                url.searchParams.set(filterType, value);
+            }
+            
+            console.log('Redirecting to:', url.toString());
+            window.location.href = url.toString();
+        }
+    </script>
     <link rel="icon" href="/assets/img/favicon.ico">
 </head>
