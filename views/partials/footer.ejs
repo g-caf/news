@@ -1,8 +1,26 @@
-<footer class="site-footer">
-    <div class="container">
-        <p>&copy; <%= new Date().getFullYear() %> NewsHub - Stay informed with the latest from your favorite publications</p>
-    </div>
-</footer>
+<script>
+// Filter functionality - inline to ensure it loads
+function applyFilter(filterType, value) {
+    const url = new URL(window.location.href);
+    
+    // Clear existing filters when changing filter type
+    url.searchParams.delete('tag');
+    url.searchParams.delete('category');
+    url.searchParams.delete('publication');
+    url.searchParams.delete('offset');
+    
+    // Set new filter if value provided
+    if (value) {
+        url.searchParams.set(filterType, value);
+    }
+    
+    window.location.href = url.toString();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('NewsHub filters initialized');
+});
+</script>
 
 <script src="/assets/js/main.js"></script>
 </body>

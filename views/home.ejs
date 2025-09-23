@@ -15,7 +15,15 @@
                 <% articles.forEach(article => { %>
                     <article class="article-card <%= article.image_url ? '' : 'no-image' %>" onclick="window.location='/articles/<%= article.id %>'">
                         <% if (article.image_url) { %>
-                            <img src="<%= article.image_url %>" alt="<%= article.title %>" class="article-image" loading="lazy" onerror="this.parentElement.classList.add('no-image'); this.style.display='none';">
+                            <img src="<%= article.image_url %>" 
+                                 alt="<%= article.title %>" 
+                                 class="article-image" 
+                                 loading="lazy" 
+                                 onerror="console.log('Image failed:', this.src); this.parentElement.classList.add('no-image'); this.style.display='none';"
+                                 onload="console.log('Image loaded:', this.src);">
+                        <% } else { %>
+                            <!-- Debug: No image URL available -->
+                            <script>console.log('No image URL for article:', '<%= article.title %>');</script>
                         <% } %>
                         <div class="article-overlay">
                             <div class="article-meta">
