@@ -84,37 +84,51 @@ router.get('/publications', async (req, res, next) => {
 // Article detail page
 router.get('/articles/:id', async (req, res, next) => {
   try {
+    console.log('Loading article ID:', req.params.id);
     const article = await Article.findById(req.params.id, null);
     
     if (!article) {
+      console.log('Article not found:', req.params.id);
       return res.status(404).render('errors/404', { title: 'Article Not Found' });
     }
     
-    console.log('Article content length:', article.content ? article.content.length : 0);
-    console.log('Article summary length:', article.summary ? article.summary.length : 0);
+    console.log('Article found:', {
+      title: article.title,
+      contentLength: article.content ? article.content.length : 0,
+      summaryLength: article.summary ? article.summary.length : 0,
+      hasImageUrl: !!article.image_url,
+      hasAuthor: !!article.author,
+      publishedDate: article.published_date
+    });
     
     // Sanitize HTML content if it exists
     let sanitizedContent = '';
-    if (article.content && article.content.trim()) {
-      sanitizedContent = sanitizeHtml(article.content, {
-        allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'figure', 'figcaption']),
-        allowedAttributes: {
-          a: ['href', 'name', 'target', 'rel'],
-          img: ['src', 'alt', 'title', 'loading', 'decoding'],
-          '*': ['class']
-        }
-      });
-      console.log('Sanitized content length:', sanitizedContent.length);
-    } else {
-      console.log('No content available for article');
+    try {
+      if (article.content && article.content.trim()) {
+        sanitizedContent = sanitizeHtml(article.content, {
+          allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'figure', 'figcaption']),
+          allowedAttributes: {
+            a: ['href', 'name', 'target', 'rel'],
+            img: ['src', 'alt', 'title', 'loading', 'decoding'],
+            '*': ['class']
+          }
+        });
+        console.log('Sanitized content length:', sanitizedContent.length);
+      } else {
+        console.log('No content to sanitize');
+      }
+    } catch (sanitizeError) {
+      console.error('Error sanitizing content:', sanitizeError);
+      sanitizedContent = '<p>Content could not be processed safely.</p>';
     }
     
     res.render('article', {
-      title: article.title,
-      article,
-      sanitizedContent
+      title: article.title || 'Article',
+      article: article,
+      sanitizedContent: sanitizedContent
     });
   } catch (error) {
+    console.error('Article route error:', error);
     next(error);
   }
 });
