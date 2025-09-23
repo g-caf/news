@@ -106,11 +106,12 @@ router.get('/articles/:id', async (req, res, next) => {
       new Date(article.published_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 
       'No date';
     
-    // Basic sanitized content
-    let sanitizedContent = '';
-    if (article.content && article.content.trim()) {
-      sanitizedContent = article.content.replace(/<script[^>]*>.*?<\/script>/gi, '');
-    }
+    // Debug content
+    console.log('Content preview:', article.content ? article.content.substring(0, 200) + '...' : 'NO CONTENT');
+    console.log('Summary preview:', article.summary ? article.summary.substring(0, 200) + '...' : 'NO SUMMARY');
+    
+    // Use the content we have
+    const displayContent = article.content || article.summary || 'No content available.';
     
     // Test with minimal template first
     res.send(`
@@ -132,7 +133,7 @@ router.get('/articles/:id', async (req, res, next) => {
         <h1>${article.title || 'Untitled'}</h1>
         ${article.author ? `<p><em>By ${article.author}</em></p>` : ''}
         <div class="content">
-          ${sanitizedContent || article.summary || '<p>No content available.</p>'}
+          ${displayContent.replace(/<script[^>]*>.*?<\/script>/gi, '')}
         </div>
         <p><a href="/">← Back to NewsHub</a></p>
         <p><a href="${article.url}" target="_blank">View Original</a></p>

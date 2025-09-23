@@ -140,9 +140,25 @@ class RSSParserService {
     let summary = item.summary || item.excerpt || '';
     let author = item.creator || item.author || null;
     
-    // Skip content extraction for now to get basic functionality working
-    // We'll re-enable this once the site is stable
-    logger.debug(`Using RSS content only for: ${item.title}`);
+    // Try to extract full article content with robust error handling
+    try {
+      const fullContent = await this.extractFullContent(url);
+      if (fullContent && fullContent.content && fullContent.content.length > 500) {
+        content = fullContent.content;
+        logger.info(`✅ Extracted ${fullContent.content.length} chars for: ${item.title}`);
+        
+        if (fullContent.author && !author) {
+          author = fullContent.author;
+        }
+        if (!summary && fullContent.content) {
+          summary = this.createSummary(fullContent.content);
+        }
+      } else {
+        logger.info(`⚠️ Short/no extracted content for: ${item.title}, using RSS content`);
+      }
+    } catch (extractError) {
+      logger.warn(`❌ Content extraction failed for ${item.title}: ${extractError.message}`);
+    }
     
     // If still no summary, create one from whatever content we have
     if (!summary && content) {
