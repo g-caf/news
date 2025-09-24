@@ -35,6 +35,15 @@ router.get('/', async (req, res, next) => {
       });
     }
     
+    // If this is an AJAX request, return just the articles grid HTML
+    if (req.headers['x-requested-with'] === 'XMLHttpRequest') {
+      console.log('AJAX request detected, returning partial HTML');
+      return res.render('partials/articles-grid', {
+        articles,
+        offset
+      });
+    }
+    
     console.log('Fetching publications and categories...');
     // Get publications for filter
     const publications = await Publication.getAll();

@@ -1,0 +1,29 @@
+<% if (articles.length === 0) { %>
+    <div class="no-articles-tile">
+        <div class="no-articles-content">
+            <h3>No articles found</h3>
+            <p>Try adjusting your filters</p>
+        </div>
+    </div>
+<% } else { %>
+    <% articles.forEach(article => { %>
+        <article class="article-card <%= article.image_url ? '' : 'no-image' %>" data-article-id="<%= article.id %>">
+            <% if (article.image_url) { %>
+                <img src="<%= article.image_url %>" 
+                     alt="<%= article.title %>" 
+                     class="article-image" 
+                     loading="lazy" 
+                     onerror="this.parentElement.classList.add('no-image'); this.style.display='none';">
+            <% } %>
+            <div class="article-overlay">
+                <div class="article-meta">
+                    <span class="publication-name"><%= article.publication_name %></span>
+                    <span class="publish-date"><%= article.published_date ? new Date(article.published_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Recent' %></span>
+                </div>
+                <h2 class="article-title">
+                    <a href="/articles/<%= article.id %>"><%= article.title %></a>
+                </h2>
+            </div>
+        </article>
+    <% }) %>
+<% } %>

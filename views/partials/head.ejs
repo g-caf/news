@@ -435,22 +435,77 @@
     <script>
         console.log('JavaScript loading...');
         
-        // Filter function - always go to home page
-        function changeFilter(type, value) {
-            console.log('Filter changing:', type, value);
-            const url = new URL('/', window.location.origin); // Always go to home page
-            url.searchParams.delete('tag');
-            url.searchParams.delete('category'); 
-            url.searchParams.delete('offset');
-            if (value) {
-                url.searchParams.set(type, value);
-            }
-            console.log('Redirecting to:', url.toString());
-            window.location.href = url.toString();
-        }
-        
         // Initialize when DOM loads
         document.addEventListener('DOMContentLoaded', function() {
+            
+            // Handle filter form submission via AJAX
+            const filterForm = document.getElementById('filter-form');
+            if (filterForm) {
+                // Add change listeners to select elements
+                const selects = filterForm.querySelectorAll('select');
+                selects.forEach(select => {
+                    select.addEventListener('change', function() {
+                        console.log('Filter changed:', select.name, select.value);
+                        handleFilterSubmission();
+                    });
+                });
+                
+                function handleFilterSubmission() {
+                    const formData = new FormData(filterForm);
+                    const params = new URLSearchParams();
+                    
+                    // Build query parameters
+                    for (const [key, value] of formData.entries()) {
+                        if (value && value.trim()) {
+                            params.set(key, value);
+                        }
+                    }
+                    
+                    const url = new URL('/', window.location.origin);
+                    // Apply the parameters
+                    for (const [key, value] of params.entries()) {
+                        url.searchParams.set(key, value);
+                    }
+                    
+                    console.log('Making AJAX request to:', url.toString());
+                    
+                    // Make AJAX request
+                    fetch(url.toString(), {
+                        method: 'GET',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.text();
+                    })
+                    .then(html => {
+                        console.log('Received filtered articles HTML');
+                        // Update the articles grid
+                        const articlesGrid = document.getElementById('articles-grid');
+                        if (articlesGrid) {
+                            articlesGrid.innerHTML = html;
+                            // Re-add click handlers to new articles
+                            addClickHandlers();
+                            // Update the URL without page reload
+                            history.pushState(null, '', url.toString());
+                            console.log('Articles updated successfully');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Filter AJAX error:', error);
+                        // Fallback to regular form submission
+                        console.log('Falling back to regular form submission');
+                        filterForm.submit();
+                    });
+                }
+                
+                console.log('Filter form AJAX initialized');
+            }
+            
             // Add click handlers to article cards
             function addClickHandlers() {
                 document.querySelectorAll('.article-card').forEach(card => {
@@ -482,7 +537,11 @@
                 const url = new URL(window.location.href);
                 url.searchParams.set('offset', currentOffset + 20);
                 
-                fetch(url.toString())
+                fetch(url.toString(), {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
                     .then(response => response.text())
                     .then(html => {
                         const parser = new DOMParser();

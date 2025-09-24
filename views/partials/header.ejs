@@ -4,8 +4,8 @@
             <a href="/">📰 NewsHub</a>
         </h1>
         
-        <div class="filter-controls">
-            <select name="topic" class="filter-select" onchange="changeFilter('tag', this.value)">
+        <form class="filter-controls" action="/" method="GET" id="filter-form">
+            <select name="tag" class="filter-select">
                 <option value="">All Topics</option>
                 <% if (typeof topicTags !== 'undefined') { %>
                     <% topicTags.forEach(tag => { %>
@@ -14,7 +14,7 @@
                 <% } %>
             </select>
             
-            <select name="category" class="filter-select" onchange="changeFilter('category', this.value)">
+            <select name="category" class="filter-select">
                 <option value="">All Types</option>
                 <% if (typeof categories !== 'undefined') { %>
                     <% categories.forEach(category => { %>
@@ -22,7 +22,10 @@
                     <% }) %>
                 <% } %>
             </select>
-        </div>
+            
+            <!-- Hidden input to ensure offset resets on filter change -->
+            <input type="hidden" name="offset" value="0">
+        </form>
         
         <form class="search-form" action="/search" method="GET">
             <input type="search" name="q" placeholder="Search..." value="<%= typeof query !== 'undefined' ? query : '' %>">
