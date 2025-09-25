@@ -26,6 +26,14 @@ class Publication {
     return result.rows[0];
   }
 
+  static async findByName(name) {
+    const result = await query(
+      'SELECT * FROM publications WHERE LOWER(TRIM(name)) = LOWER(TRIM($1))',
+      [name]
+    );
+    return result.rows[0];
+  }
+
   static async create(data) {
     const {
       name,
@@ -35,6 +43,17 @@ class Publication {
       description,
       category
     } = data;
+
+    // Check for existing publication by name or RSS URL
+    const existingByName = await this.findByName(name);
+    if (existingByName) {
+      throw new Error(`Publication with name "${name}" already exists`);
+    }
+    
+    const existingByUrl = await this.findByUrl(rss_url);
+    if (existingByUrl) {
+      throw new Error(`Publication with RSS URL "${rss_url}" already exists`);
+    }
 
     const sql = `
       INSERT INTO publications (name, rss_url, website_url, logo_url, description, category)
