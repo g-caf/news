@@ -3,6 +3,7 @@ const { authenticate } = require('../middleware/auth');
 const schedulerService = require('../services/scheduler');
 const { query } = require('../config/database');
 const logger = require('../utils/logger');
+const fixDuplicates = require('../../fix-duplicates');
 
 const router = express.Router();
 
@@ -122,6 +123,26 @@ router.post('/cleanup', authenticate, async (req, res) => {
   } catch (error) {
     logger.error('Error running cleanup:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// POST /api/admin/fix-duplicates - TEMPORARY ENDPOINT - Remove after running
+router.post('/fix-duplicates-temp', authenticate, async (req, res) => {
+  try {
+    await fixDuplicates();
+    res.json({ 
+      success: true, 
+      message: 'Duplicate publication cleanup completed successfully',
+      timestamp: new Date().toISOString(),
+      note: 'This endpoint should be removed after running'
+    });
+  } catch (error) {
+    logger.error('Error fixing duplicates:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
   }
 });
 
