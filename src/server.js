@@ -54,7 +54,26 @@ if (process.env.NODE_ENV !== 'production') {
   app.use(cors({ origin: true, credentials: true }));
 }
 
-// Rate limiting
+// Health check endpoints (BEFORE rate limiting)
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    memory: process.memoryUsage()
+  });
+});
+
+// API health check for Render
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
+});
+
+// Rate limiting (AFTER health checks)
 const limiter = rateLimit({
   windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
   max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100,
@@ -106,24 +125,7 @@ app.use(morgan('combined', {
   }
 }));
 
-// Health check endpoint (before authentication)
-app.get('/health', (req, res) => {
-  res.json({
-    status: 'ok',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    memory: process.memoryUsage()
-  });
-});
-
-// API health check for Render
-app.get('/api/health', (req, res) => {
-  res.json({
-    status: 'ok',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime()
-  });
-});
+// Health checks moved above before rate limiting
 
 // Page routes (serve HTML)
 app.use('/', pagesRouter);
